@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.3.2/dist/confetti.browser.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+<html>
+
+<head>
+    <base target="_top">
+    <style>
+        #body {
+            background-color: #232323;
+        }
+        
+        #main-content {
+            margin-top: 10%;
+            text-align: center;
+        }
+        
+        #who-is {
+            color: white;
+        }
+        
+        .name {
+            margin: 5%;
+        }
+        
+        .status {
+            margin: 5%;
+        }
+        
+        #message {
+            /* background: linear-gradient(to right, #f00 0%, #f80 14.28%, #dd0 28.56%, #0d0 42.85%, #0dd 57.14%, #00f 71.42%, #e0e 85.71%, #f00 100%);
+          background: -webkit-linear-gradient(left, #f00 0%, #f80 14.28%, #dd0 28.56%, #0d0 42.85%, #0dd 57.14%, #00f 71.42%, #e0e 85.71%, #f00 100%);
+          background: -o-linear-gradient(right, #f00 0%, #f80 14.28%, #dd0 28.56%, #0d0 42.85%, #0dd 57.14%, #00f 71.42%, #e0e 85.71%, #f00 100%);
+          background: -moz-linear-gradient(right, #f00 0%, #f80 14.28%, #dd0 28.56%, #0d0 42.85%, #0dd 57.14%, #00f 71.42%, #e0e 85.71%, #f00 100%); */
+            font-family: serif;
+            background: linear-gradient(45deg, #B67B03 0%, #DAAF08 45%, #FEE9A0 70%, #DAAF08 85%, #B67B03 90% 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body id="body">
+    <div id="main-content" class="container">
+        <h1 id="message">　</h1>
+        <div class="name row">
+            <div class="col">
+                <h1 id="who-is"></h1>
+                <input id="todays-member" type="hidden" name="member" value=<?=member ?>>
+            </div>
+        </div>
+        <div class="status row">
+            <div class="col">
+                <div id="control-button">
+                    <div class="d-grid col-4 mx-auto">
+                        <button type="button" class="btn btn-lg btn-light status-button" id="state" onclick="changeStatus();" value="START">START</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const container = document.getElementById('container');
+    var globalStatus = "START";
+    const members = [];
+    var determineStatus = false;
+
+    function changeStatus() {
+        var bodyElement = document.getElementById("body");
+        var statusElement = document.getElementById("state");
+        var status = statusElement.value;
+        switch (status) {
+            case "START":
+                statusElement.value = "STOP";
+                statusElement.innerHTML = "STOP";
+                globalStatus = "STOP";
+                start();
+                break;
+            case "STOP":
+                var statusElement = document.getElementById("state");
+                statusElement.disabled = true;
+                new Promise((resolve) => { // #1
+                    var span = 300;
+                    var setTimeList = [];
+                    for (var i = 300; i < 2000; i *= 2) {
+                        setTimeList.push(
+                            setTimeout(() => {
+                                var memberTextElement = document.getElementById("who-is").textContent;
+                                var random = Math.floor(Math.random() * 6);
+                                while (memberTextElement == members[random]) {
+                                    random = Math.floor(Math.random() * 6);
+                                }
+                                document.getElementById("who-is").textContent = members[random];
+                            }, i)
+                        );
+                    }
+                    setTimeList.push(
+                        setTimeout(() => {
+                            var memberTextElement = document.getElementById("who-is").textContent;
+                            var random = Math.floor(Math.random() * 6);
+                            while (memberTextElement == members[random]) {
+                                random = Math.floor(Math.random() * 6);
+                            }
+                            var element = document.getElementById('todays-member');
+                            console.log(element);
+                            document.getElementById("who-is").textContent = element.value;
+                            resolve()
+                        }, i)
+                    );
+                    for (var j = 0; j < setTimeList.length; j++) {
+                        setTimeList[j];
+                    }
+                }).then(() => {
+                    determineStatus = true;
+                    determine();
+                    statusElement.disabled = false;
+                });
+                statusElement.value = "RETRY";
+                statusElement.innerHTML = "RETRY";
+                globalStatus = "RETRY";
+                break;
+            case "RETRY":
+                document.getElementById("message").innerHTML = "　";
+                statusElement.value = "START";
+                statusElement.innerHTML = "START";
+                globalStatus = "START";
+                determineStatus = false;
+                break;
+            default:
+                document.getElementById("message").innerHTML = "　";
+                statusElement.value = "START";
+                statusElement.innerHTML = "START";
+                globalStatus = "START";
+                determineStatus = false;
+                break;
+        }
+    }
+    //confetti-btnをクリックすると発火
+    function determine() {
+        document.getElementById("message").innerHTML = "Congratulation!!!";
+        confetti({
+            particleCount: 200,
+            spread: 50,
+            origin: {
+                y: 1.0
+            }
+        });
+    };
+
+    function start() {
+        const timerId = setInterval(function() {
+            var memberTextElement = document.getElementById("who-is").textContent;
+            var random = Math.floor(Math.random() * 6);
+            while (memberTextElement == members[random]) {
+                random = Math.floor(Math.random() * 6);
+            }
+            document.getElementById("who-is").textContent = members[random];
+            if (globalStatus == "RETRY") {
+                clearInterval(timerId)
+            }
+        }, 120)
+    }
+
+    let ele;
+    const Y_AXIS = 1;
+    const X_AXIS = 2;
+    let canvas;
+    let fireworks = [];
+    let star = [];
+
+    function windowResized() {
+        resizeCanvas(document.documentElement.clientWidth, document.documentElement.clientHeight);
+    }
+
+    function setup() {
+        // キャンバスの設定
+        canvas = createCanvas(document.documentElement.clientWidth, document.documentElement.clientHeight);
+        canvas.position(0, 0);
+        canvas.style("z-index", "-1");
+        colorMode(RGB);
+        frameRate(60);
+    }
+
+    function draw() {
+        // 背景色を設定
+        // setGradient(0, 0, width, height, color(0, 0, 0), color(24, 32, 72), Y_AXIS);
+        setGradient(0, 0, width, height, color(35, 35, 35), color(35, 35, 35), Y_AXIS);
+        noStroke();
+
+        // 花火を打ち上げる間隔を調整
+        if (0 === frameCount % 100) {
+            // 打ち上がるスピード
+            let speed = random(10, 30);
+            fireworks.push(new FireWork(random(width), height, 0, speed, 0.98));
+        }
+
+        for (let fw of fireworks) {
+            // 打ち切った花火を処理対象から外す（配列から削除する）
+            if (2 === fw.getType || 30000 < fw.getFrame) {
+                fireworks = fireworks.filter((n) => n !== fw);
+                continue;
+            }
+
+            // 打ち上げアニメーションを呼び出す
+            if (determineStatus) {
+                fw.fire();
+            }
+        }
+    }
+
+    class FireWork {
+        // 初期設定
+        constructor(x, y, vx, vy, gv) {
+            // フレームカウンター
+            this.frame = 0;
+            this.type = 0;
+            this.next = 0;
+            // 花火の色
+            this.r = random(155) + 80;
+            this.g = random(155) + 80;
+            this.b = random(155) + 80;
+            this.a = 255;
+
+            // 初期位置
+            this.x = x;
+            this.y = y;
+
+            // 玉の大きさ
+            this.w = random(10, 5);
+
+            // 打ち上がる高さ
+            this.maxHeight = random(height / 6, height / 2);
+            this.fireHeight = height - this.maxHeight;
+
+            // 重力
+            this.vx = vx;
+            this.vy = vy;
+            this.gv = gv;
+
+            // 残像表示用配列
+            this.afterImages = [];
+            // 爆発用配列
+            this.explosions = [];
+
+            // 消えてから爆発までの遅延時間
+            this.exDelay = random(10, 40);
+            // 爆発の大きさ
+            this.large = random(5, 15);
+            // 爆発の玉の数
+            this.ball = random(40, 200);
+            // 爆発から消えるまでの長さ
+            this.exend = random(20, 40);
+            // 爆発のブレーキ
+            this.exStop = 0.96;
+        }
+
+        get getFrame() {
+            return this.frame;
+        }
+
+        get getType() {
+            return this.type;
+        }
+
+        // 処理コントロール
+        fire() {
+            // 0:打ち上げ（初期） 1:爆発
+            switch (this.type) {
+                case 0:
+                    this.rising();
+                    break;
+                case 1:
+                    this.explosion();
+                    break;
+            }
+        }
+
+        // 打ち上げアニメーション
+        rising() {
+            // 頂点まで達したら消す
+            if (this.y * 0.8 < this.maxHeight) {
+                this.a = this.a - 6;
+            }
+
+            // 指定の高さまで上昇する
+            this.x += this.vx;
+            this.y -= this.vy * ((this.fireHeight - (height - this.y)) / this.fireHeight);
+
+            // 残像を表示
+            this.afterImages.push(new Afterimage(this.r, this.g, this.b, this.x, this.y, this.w, this.a));
+            for (let ai of this.afterImages) {
+                if (ai.getAlpha <= 0) {
+                    this.afterImages = this.afterImages.filter((n) => n !== ai);
+                    continue;
+                }
+                ai.rsImage();
+            }
+
+            // 打ち上げ表示
+            this.update(this.x, this.y, this.w);
+
+            // 全ての表示が消えたら処理の種類を変更する
+            if (0 == this.afterImages.length) {
+                if (0 === this.next) {
+                    // 消えてから爆発まで遅延させる
+                    this.next = this.frame + Math.round(this.exDelay);
+                } else if (this.next === this.frame) {
+                    let s = PI;
+                    let r = 0;
+
+                    for (let i = 0; i < this.ball; i++) {
+                        if (i > 0) {
+                            let a = 2 * i / (this.ball * 2 - 1) - 1;
+                            s = acos(a);
+                            r = (r + 3.6 / sqrt(this.ball * 2) / sqrt(1 - a * a)) % (PI * 2);
+                        }
+
+                        let vx = this.large * sin(s) * cos(r);
+                        let vy = this.large * sin(s) * sin(r);
+                        this.explosions.push(new FireWork(this.x, this.y, vx, vy, this.exStop));
+                    }
+                    this.a = 255;
+                    this.type = 1;
+                }
+            }
+        }
+
+        // 爆発アニメーション
+        explosion() {
+            for (let ex of this.explosions) {
+                ex.frame++;
+                // 爆発し終わった花火を配列から除去する
+                if (2 === ex.getType) {
+                    this.explosions = this.explosions.filter((n) => n !== ex);
+                    continue;
+                }
+
+                // 残像を描画
+                if (0 === Math.round(random(0, 32))) {
+                    ex.afterImages.push(new Afterimage(this.r, this.g, this.b, ex.x, ex.y, ex.w, ex.a));
+                }
+
+                for (let ai of ex.afterImages) {
+                    if (ai.getAlpha < 0) {
+                        ex.afterImages = ex.afterImages.filter((n) => n !== ai);
+                        continue;
+                    }
+                    ai.exImage();
+                }
+
+                // 爆発を描画
+                this.update(ex.x, ex.y, ex.w, ex.a);
+                ex.x += ex.vx;
+                ex.y += ex.vy;
+                ex.vx = ex.vx * ex.gv;
+                ex.vy = ex.vy * ex.gv;
+                ex.vy = ex.vy + ex.gv / 30;
+                if (this.exend < ex.frame) {
+                    ex.w -= 0.1;
+                    ex.a = ex.a - 4;
+                    if (ex.a < 0 && 0 === ex.afterImages.length) {
+                        ex.type = 2;
+                    }
+                }
+            }
+        }
+
+        // 花火を表示する
+        update(x, y, w, a) {
+            this.frame++;
+            if (0 < this.a) {
+                let c = color(this.r, this.g, this.b);
+                c.setAlpha(a);
+                fill(c);
+                ellipse(x, y, w, w);
+            }
+        }
+    }
+
+    // 残像処理用クラス
+    class Afterimage {
+        constructor(r, g, b, x, y, w, a) {
+            this.frame = 0;
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.a = a;
+            this.vx = random(-0.24, 0.24);
+            this.vy = random(0.2, 0.8);
+            this.vw = random(0.05, 0.2);
+        }
+
+        get getAlpha() {
+            return this.a;
+        }
+
+        // 打ち上げ用
+        rsImage() {
+            if (0 < this.a) {
+                this.update(this.r, this.g, this.b, this.x, this.y, this.w, this.a);
+                this.r += 4;
+                this.g += 4;
+                this.b += 4;
+                this.x = this.x + this.vx;
+                this.y = this.y + this.vy;
+                if (0 < this.w) {
+                    this.w = this.w - this.vw;
+                }
+                this.a = this.a - 4;
+            }
+        }
+
+        // 爆発用
+        exImage() {
+            if (0 < this.a) {
+                this.update(this.r, this.g, this.b, this.x, this.y, this.w, this.a);
+                this.r += 2.5;
+                this.g += 2.5;
+                this.b += 2.5;
+                this.x = this.x + this.vx;
+                this.y = this.y + this.vy;
+                if (0 < this.w) {
+                    this.w = this.w - this.vw;
+                }
+                this.a = this.a - 1.5;
+            }
+        }
+
+        update(r, g, b, x, y, w, a) {
+            this.frame++;
+            let c = color(r, g, b);
+            c.setAlpha(a);
+            fill(c);
+            ellipse(x, y, w, w);
+        }
+    }
+
+    // グラデーションを描画
+    function setGradient(x, y, w, h, c1, c2, axis) {
+        noFill();
+
+        if (axis === Y_AXIS) {
+            // Top to bottom gradient
+            for (let i = y; i <= y + h; i++) {
+                let inter = map(i, y, y + h, 0, 1);
+                let c = lerpColor(c1, c2, inter);
+                stroke(c);
+                line(x, i, x + w, i);
+            }
+        } else if (axis === X_AXIS) {
+            // Left to right gradient
+            for (let i = x; i <= x + w; i++) {
+                let inter = map(i, x, x + w, 0, 1);
+                let c = lerpColor(c1, c2, inter);
+                stroke(c);
+                line(i, y, i, y + h);
+            }
+        }
+    }
+</script>
+
+</html>
